@@ -110,9 +110,11 @@ Error ResourceImporterCSVTranslation::import(const String &p_source_file, const 
 		translations.push_back(translation);
 	}
 
-	line = f->get_csv_line(delimiter);
-
-	while (line.size() == locales.size() + 1) {
+	while (!f->eof_reached()) {
+		line = f->get_csv_line(delimiter);
+		if (line.size() != locales.size() + 1) {
+			break;
+		}
 
 		String key = line[0];
 		if (key != "") {
@@ -121,8 +123,6 @@ Error ResourceImporterCSVTranslation::import(const String &p_source_file, const 
 				translations[i - 1]->add_message(key, line[i]);
 			}
 		}
-
-		line = f->get_csv_line(delimiter);
 	}
 
 	for (int i = 0; i < translations.size(); i++) {
