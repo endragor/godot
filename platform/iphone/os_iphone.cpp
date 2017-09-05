@@ -31,6 +31,8 @@
 
 #include "os_iphone.h"
 
+#include <unistd.h>
+
 #include "drivers/gles3/rasterizer_gles3.h"
 #include "servers/visual/visual_server_raster.h"
 //#include "servers/visual/visual_server_wrap_mt.h"
@@ -79,6 +81,15 @@ void OSIPhone::set_data_dir(String p_dir) {
 	DirAccess *da = DirAccess::open(p_dir);
 
 	data_dir = da->get_current_dir();
+
+	String log_path = data_dir + "/game.log";
+	FILE *log_file = fopen(log_path.utf8().get_data(), "w");
+	if (log_file) {
+		dup2(fileno(log_file), STDOUT_FILENO);
+		dup2(fileno(log_file), STDERR_FILENO);
+		fclose(log_file);
+	}
+
 	printf("setting data dir to %ls from %ls\n", data_dir.c_str(), p_dir.c_str());
 	memdelete(da);
 };
