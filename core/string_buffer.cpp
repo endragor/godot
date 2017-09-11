@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  button_group.h                                                       */
+/*  string_buffer.cpp                                                    */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -27,42 +27,76 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
-#ifndef BUTTON_GROUP_H
-#define BUTTON_GROUP_H
+#include "string_buffer.h"
 
-#include "scene/gui/box_container.h"
+#include <string.h>
 
-#if 0
-class BaseButton;
+StringBuffer &StringBuffer::append(CharType p_char) {
+	reserve(string_length + 2);
+	current_buffer_ptr()[string_length++] = p_char;
+	return *this;
+}
 
-class ButtonGroup : public BoxContainer {
+StringBuffer &StringBuffer::append(const String &p_string) {
+	return append(p_string.c_str());
+}
 
-	GDCLASS(ButtonGroup,BoxContainer);
+StringBuffer &StringBuffer::append(const char *p_str) {
+	int len = strlen(p_str);
+	reserve(string_length + len + 1);
 
+	CharType *buf = current_buffer_ptr();
+	for (const char *c_ptr = p_str; c_ptr; ++c_ptr) {
+		buf[string_length++] = *c_ptr;
+	}
+	return *this;
+}
 
-	Set<BaseButton*> buttons;
+StringBuffer &StringBuffer::append(const CharType *p_str, int p_clip_to_len) {
+	int len = 0;
+	while ((p_clip_to_len < 0 || len < p_clip_to_len) && p_str[len]) {
+		++len;
+	}
+	reserve(string_length + len + 1);
+	memcpy(&(current_buffer_ptr()[string_length]), p_str, len * sizeof(CharType));
+	string_length += len;
 
+	return *this;
+}
 
-	Array _get_button_list() const;
-	void _pressed(Object *p_button);
+StringBuffer &StringBuffer::reserve(int p_size) {
+	if (p_size < SHORT_BUFFER_SIZE || p_size < buffer.size())
+		return *this;
 
-protected:
-friend class BaseButton;
+	bool need_copy = string_length > 0 && buffer.empty();
+	buffer.resize(next_power_of_2(p_size));
+	if (need_copy) {
+		memcpy(buffer.ptr(), short_buffer, string_length * sizeof(CharType));
+	}
 
-	void _add_button(BaseButton *p_button);
-	void _remove_button(BaseButton *p_button);
+	return *this;
+}
 
-	static void _bind_methods();
-public:
+int StringBuffer::length() const {
+	return string_length;
+}
 
-	void get_button_list(List<BaseButton*> *p_buttons) const;
-	BaseButton *get_pressed_button() const;
-	BaseButton *get_focused_button() const;
-	void set_pressed_button(BaseButton *p_button);
-	int get_pressed_button_index() const;
+String StringBuffer::as_string() {
+	current_buffer_ptr()[string_length] = '\0';
+	if (buffer.empty()) {
+		return String(short_buffer);
+	} else {
+		buffer.resize(string_length + 1);
+		return buffer;
+	}
+}
 
-	ButtonGroup();
-};
+double StringBuffer::as_double() {
+	current_buffer_ptr()[string_length] = '\0';
+	return String::to_double(current_buffer_ptr());
+}
 
-#endif
-#endif // BUTTON_GROUP_H
+int64_t StringBuffer::as_int() {
+	current_buffer_ptr()[string_length] = '\0';
+	return String::to_int(current_buffer_ptr());
+}

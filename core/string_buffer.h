@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  theme_editor_plugin.h                                                */
+/*  string_buffer.h                                                      */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -27,90 +27,56 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
-#ifndef THEME_EDITOR_PLUGIN_H
-#define THEME_EDITOR_PLUGIN_H
+#ifndef STRING_BUFFER_H
+#define STRING_BUFFER_H
 
-#include "scene/gui/check_box.h"
-#include "scene/gui/file_dialog.h"
-#include "scene/gui/option_button.h"
-#include "scene/gui/scroll_container.h"
-#include "scene/gui/texture_rect.h"
-#include "scene/resources/theme.h"
+#include "ustring.h"
 
-#include "editor/editor_node.h"
+class StringBuffer {
+	static const int SHORT_BUFFER_SIZE = 64;
 
-class ThemeEditor : public Control {
+	CharType short_buffer[SHORT_BUFFER_SIZE];
+	String buffer;
+	int string_length = 0;
 
-	GDCLASS(ThemeEditor, Control);
-
-	ScrollContainer *scroll;
-	VBoxContainer *main_vb;
-	Ref<Theme> theme;
-
-	EditorFileDialog *file_dialog;
-
-	double time_left;
-
-	MenuButton *theme_menu;
-	ConfirmationDialog *add_del_dialog;
-	HBoxContainer *type_hbc;
-	MenuButton *type_menu;
-	LineEdit *type_edit;
-	HBoxContainer *name_hbc;
-	MenuButton *name_menu;
-	LineEdit *name_edit;
-	OptionButton *type_select;
-	Label *type_select_label;
-	Label *name_select_label;
-
-	enum PopupMode {
-		POPUP_ADD,
-		POPUP_CLASS_ADD,
-		POPUP_REMOVE,
-		POPUP_CLASS_REMOVE,
-		POPUP_CREATE_EMPTY,
-		POPUP_CREATE_EDITOR_EMPTY
-	};
-
-	int popup_mode;
-
-	Tree *test_tree;
-
-	void _save_template_cbk(String fname);
-	void _dialog_cbk();
-	void _type_menu_cbk(int p_option);
-	void _name_menu_about_to_show();
-	void _name_menu_cbk(int p_option);
-	void _theme_menu_cbk(int p_option);
-	void _propagate_redraw(Control *p_at);
-	void _refresh_interval();
-
-protected:
-	void _notification(int p_what);
-	static void _bind_methods();
+	_FORCE_INLINE_ CharType *current_buffer_ptr() {
+		return static_cast<Vector<CharType> &>(buffer).empty() ? short_buffer : buffer.ptr();
+	}
 
 public:
-	void edit(const Ref<Theme> &p_theme);
+	StringBuffer &append(CharType p_char);
+	StringBuffer &append(const String &p_string);
+	StringBuffer &append(const char *p_str);
+	StringBuffer &append(const CharType *p_str, int p_clip_to_len = -1);
 
-	ThemeEditor();
+	_FORCE_INLINE_ void operator+=(CharType p_char) {
+		append(p_char);
+	}
+
+	_FORCE_INLINE_ void operator+=(const String &p_string) {
+		append(p_string);
+	}
+
+	_FORCE_INLINE_ void operator+=(const char *p_str) {
+		append(p_str);
+	}
+
+	_FORCE_INLINE_ void operator+=(const CharType *p_str) {
+		append(p_str);
+	}
+
+	StringBuffer &reserve(int p_size);
+
+	int length() const;
+
+	String as_string();
+
+	double as_double();
+	int64_t as_int();
+
+	_FORCE_INLINE_ operator String() {
+		return as_string();
+	}
 };
 
-class ThemeEditorPlugin : public EditorPlugin {
-
-	GDCLASS(ThemeEditorPlugin, EditorPlugin);
-
-	ThemeEditor *theme_editor;
-	EditorNode *editor;
-	Button *button;
-
-public:
-	virtual String get_name() const { return "Theme"; }
-	bool has_main_screen() const { return false; }
-	virtual void edit(Object *p_node);
-	virtual bool handles(Object *p_node) const;
-	virtual void make_visible(bool p_visible);
-
-	ThemeEditorPlugin(EditorNode *p_node);
-};
-
-#endif // THEME_EDITOR_PLUGIN_H
+#endif
