@@ -217,11 +217,12 @@ void EditorSettings::raise_order(const String &p_name) {
 }
 
 Variant _EDITOR_DEF(const String &p_var, const Variant &p_default) {
-
-	if (EditorSettings::get_singleton()->has(p_var))
-		return EditorSettings::get_singleton()->get(p_var);
-	EditorSettings::get_singleton()->set(p_var, p_default);
-	EditorSettings::get_singleton()->set_initial_value(p_var, p_default);
+	if (EditorSettings::get_singleton()) {
+		if (EditorSettings::get_singleton()->has(p_var))
+			return EditorSettings::get_singleton()->get(p_var);
+		EditorSettings::get_singleton()->set(p_var, p_default);
+		EditorSettings::get_singleton()->set_initial_value(p_var, p_default);
+	}
 
 	return p_default;
 }
