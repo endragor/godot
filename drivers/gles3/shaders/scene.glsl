@@ -470,16 +470,16 @@ VERTEX_SHADER_CODE
 	diffuse_light_interp=vec4(0.0);
 	specular_light_interp=vec4(0.0);
 
-#ifdef USE_FORWARD_LIGHTING
+// #ifdef USE_FORWARD_LIGHTING
 
-	for(int i=0;i<omni_light_count;i++) {
-		light_process_omni(omni_light_indices[i],vertex_interp,-normalize( vertex_interp ),normal_interp,roughness,diffuse_light_interp.rgb,specular_light_interp.rgb);
-	}
+// 	for(int i=0;i<omni_light_count;i++) {
+// 		light_process_omni(omni_light_indices[i],vertex_interp,-normalize( vertex_interp ),normal_interp,roughness,diffuse_light_interp.rgb,specular_light_interp.rgb);
+// 	}
 
-	for(int i=0;i<spot_light_count;i++) {
-		light_process_spot(spot_light_indices[i],vertex_interp,-normalize( vertex_interp ),normal_interp,roughness,diffuse_light_interp.rgb,specular_light_interp.rgb);
-	}
-#endif
+// 	for(int i=0;i<spot_light_count;i++) {
+// 		light_process_spot(spot_light_indices[i],vertex_interp,-normalize( vertex_interp ),normal_interp,roughness,diffuse_light_interp.rgb,specular_light_interp.rgb);
+// 	}
+// #endif
 
 #ifdef USE_LIGHT_DIRECTIONAL
 
@@ -2089,22 +2089,22 @@ FRAGMENT_SHADER_CODE
 
 		//apply fog
 
-		if (fog_depth_enabled) {
+		// if (fog_depth_enabled) {
 
-			float fog_z = smoothstep(fog_depth_begin,z_far,length(vertex));
+		// 	float fog_z = smoothstep(fog_depth_begin,z_far,length(vertex));
 
-			fog_amount = pow(fog_z,fog_depth_curve);
-			if (fog_transmit_enabled) {
-				vec3 total_light = emission + ambient_light + specular_light + diffuse_light;
-				float transmit = pow(fog_z,fog_transmit_curve);
-				fog_color = mix(max(total_light,fog_color),fog_color,transmit);
-			}
-		}
+		// 	fog_amount = pow(fog_z,fog_depth_curve);
+		// 	if (fog_transmit_enabled) {
+		// 		vec3 total_light = emission + ambient_light + specular_light + diffuse_light;
+		// 		float transmit = pow(fog_z,fog_transmit_curve);
+		// 		fog_color = mix(max(total_light,fog_color),fog_color,transmit);
+		// 	}
+		// }
 
-		if (fog_height_enabled) {
-			float y = (camera_matrix * vec4(vertex,1.0)).y;
-			fog_amount = max(fog_amount,pow(smoothstep(fog_height_min,fog_height_max,y),fog_height_curve));
-		}
+		// if (fog_height_enabled) {
+		// 	float y = (camera_matrix * vec4(vertex,1.0)).y;
+		// 	fog_amount = max(fog_amount,pow(smoothstep(fog_height_min,fog_height_max,y),fog_height_curve));
+		// }
 
 		float rev_amount = 1.0 - fog_amount;
 
